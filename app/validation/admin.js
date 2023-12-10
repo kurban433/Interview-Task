@@ -52,14 +52,15 @@ module.exports = function (model) {
         try {
             console.log(">>>>", req.body);
             let userList = Joi.object({
-                start: Joi.number().empty().required().messages({
-                    'string.empty': "Email can't be an empty",
-                    'string.required': "Email must be required",
+                pageNumber: Joi.number().empty().required().messages({
+                    'string.empty': "PageNumber can't be an empty",
+                    'string.required': "PageNumber must be required",
                 }),
                 length: Joi.number().empty().required().messages({
-                    'string.empty': "Email can't be an empty",
-                    'string.required': "Password must be required",
+                    'string.empty': "Length can't be an empty",
+                    'string.required': "Length must be required",
                 }),
+                search: Joi.string().allow(null, ""),
             });
 
             const { error, value } = userList.validate(req.body, {
@@ -85,7 +86,71 @@ module.exports = function (model) {
                 message: "Something went wrong"
             });
         }
+    }
 
+    module.deleteUser = function name(req, res, next) {
+        try {
+            console.log(">>>>", req.body);
+            let deleteUser = Joi.object({
+                id: Joi.string().empty().required().messages({
+                    'string.empty': "Id can't be an empty",
+                    'string.required': "Id must be required",
+                }),
+            });
+            const { error, value } = deleteUser.validate(req.body, {
+                abortEarly: false,
+            });
+            if (error) {
+                console.log("error", error);
+                return res.send({
+                    status: "fail",
+                    result: {},
+                    message: error.message
+                });
+            }
+            next()
+        } catch (error) {
+            console.log("userList validation error", error);
+            return res.send({
+                status: "fail",
+                result: {},
+                message: "Something went wrong"
+            });
+        }
+    }
+
+    module.editUser = function name(req, res, next) {
+        try {
+            console.log(">>>>", req.body);
+            let deleteUser = Joi.object({
+                id: Joi.string().empty().required().messages({
+                    'string.empty': "Id can't be an empty",
+                    'string.required': "Id must be required",
+                }),
+                username : Joi.string().allow(null, ""),
+                email :Joi.string().allow(null, ""),
+                status :Joi.string().allow(null, ""),
+            });
+            const { error, value } = deleteUser.validate(req.body, {
+                abortEarly: false,
+            });
+            if (error) {
+                console.log("error", error);
+                return res.send({
+                    status: "fail",
+                    result: {},
+                    message: error.message
+                });
+            }
+            next()
+        } catch (error) {
+            console.log("userList validation error", error);
+            return res.send({
+                status: "fail",
+                result: {},
+                message: "Something went wrong"
+            });
+        }
     }
 
     return module

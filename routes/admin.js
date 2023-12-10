@@ -5,6 +5,10 @@ module.exports = function (app, model, controller) {
 
     app.post('/admin', validation.admin.adminLogin, controller.admin.adminLogin);
 
-    app.post('/userList',validation.admin.userList, middleware.admin.isLogin, controller.admin.getUserList);
+    app.post('/admin/userList',validation.admin.userList, middleware.admin.isLogin, controller.admin.getUserList);
+
+    app.post('/admin/userDelete',validation.admin.deleteUser, middleware.admin.isLogin, controller.admin.deleteUser);
+
+    app.post('/admin/userEdit',validation.admin.editUser, middleware.admin.isLogin, controller.admin.editUser);
 
 }

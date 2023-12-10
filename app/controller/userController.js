@@ -10,7 +10,8 @@ module.exports = function (model) {
             let { email, password } = request.body
 
             let userData = await model.User.findOne({
-                email: email
+                email: email,
+                isDelete: false,
             })
 
             if (!userData) {
@@ -21,6 +22,14 @@ module.exports = function (model) {
                 });
             }
 
+            if (userData.status == "Inactive") {
+                return response.send({
+                    status: "fail",
+                    result: {},
+                    message: "Block from admin side, Please contact to admin."
+                });
+            }
+
             if (!bcrypt.compareSync(password, userData.password)) {
                 return response.send({
                     status: "fail",
@@ -28,7 +37,7 @@ module.exports = function (model) {
                     message: "Invalid credentials!",
                     statusCode: 401,
                 });
-            }
+            }userLogin
 
 
             var token = jwt.sign({ data: userData._id }, config.jwt_secret, { expiresIn: config.jwt_expire });
@@ -46,7 +55,7 @@ module.exports = function (model) {
             });
 
         } catch (error) {
-            console.log("error",error);
+            console.log("error", error);
             return response.send({
                 status: "fail",
                 result: null,
@@ -65,7 +74,7 @@ module.exports = function (model) {
                 email: email,
                 isDelete: false
             })
-            console.log("findOne",getUser);
+            console.log("findOne", getUser);
             if (getUser) {
                 console.log("aaa");
                 return response.send({
@@ -97,7 +106,7 @@ module.exports = function (model) {
             });
 
         } catch (error) {
-            console.log("error",error);
+            console.log("error", error);
             return response.send({
                 status: "fail",
                 result: null,

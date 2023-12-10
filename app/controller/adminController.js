@@ -1,5 +1,6 @@
 let bcrypt = require("bcrypt")
 var jwt = require('jsonwebtoken');
+let mongoose = require('mongoose');
 
 module.exports = function (model) {
     var module = {};
@@ -69,10 +70,11 @@ module.exports = function (model) {
 
             console.log("??", request.body);
 
-            let { start, length, search } = request.body
+            let { pageNumber, length, search } = request.body
 
             let query = {
                 isDelete: false,
+                role:'user'
             }
 
             if (search) {
@@ -82,8 +84,11 @@ module.exports = function (model) {
                 ]
             }
 
-            let userlist = await model.User.find().skip(start)
-                .limit(length)
+            let start = pageNumber * length 
+            start = start -length
+
+            let userlist = await model.User.find(query).skip(Number(start))
+                .limit(Number(length))
                 .sort({ createdAt: -1 })
                 .lean();
 
@@ -104,6 +109,90 @@ module.exports = function (model) {
             });
         }
     }
+
+    module.deleteUser = async function (request, response) {
+        try {
+            let user = await model.User.findOne({ _id: request.body.id });
+            if (!user) {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "User not found.",
+                    statusCode: 401,
+                });
+            };
+
+            let userUpdate = await model.User.updateOne({ _id : request.body.id },{ isDelete: true });
+            if(userUpdate){
+                return response.send({
+                    status: "success",
+                    result: null,
+                    message: "Successfully Delete User.",
+                    statusCode: 200,
+                });
+            }else{
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "User not update, please try after sometime.",
+                    statusCode: 401,
+                });
+            }
+
+        } catch (error) {
+            console.log("error", error);
+            return response.send({
+                status: "fail",
+                result: null,
+                message: "Something went wrong",
+                statusCode: 401,
+            });
+        }
+    }
+
+    module.editUser = async function (request, response) {
+        try {
+            let { id, username, email, status } = request.body
+            let user = await model.User.findOne({ _id: id, isDelete : false });
+            if (!user) {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "User not found.",
+                    statusCode: 401,
+                });
+            };
+            let userUpdate = await model.User.updateOne({ _id : id },{ 
+                username : username,
+                email : email,
+                status : status,
+            });
+            if(userUpdate){
+                return response.send({
+                    status: "success",
+                    result: null,
+                    message: "Successfully Update User Details.",
+                    statusCode: 200,
+                });
+            }else{
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "User not update, please try after sometime.",
+                    statusCode: 401,
+                });
+            }
+        } catch (error) {
+            console.log("error", error);
+            return response.send({
+                status: "fail",
+                result: null,
+                message: "Something went wrong",
+                statusCode: 401,
+            });
+        }
+    }
+
 
     return module
 
