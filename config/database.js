@@ -1,5 +1,5 @@
-let mongoose = require('mongoose');
-module.exports = async function () {
+
+module.exports = async function (mongoose) {
     let dbconnect = new Promise((resolve, reject) => {
         var url = "mongodb://localhost:27017/DB_FMCG";
 

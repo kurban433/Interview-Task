@@ -3,7 +3,7 @@ let fs = require('fs');
 let path = require("path");
 let bodyParser = require("body-parser");
 let fileUpload = require("express-fileupload");
-
+let mongoose = require('mongoose');
 let app = express();
 let server = require("http").createServer(app);
 app.use(fileUpload());
@@ -23,9 +23,12 @@ app.use(function (req, res, next) {
 
 var model = require("./app/model/index")(mongoose);
 var controller = require("./app/controller/index")(model);
-require("./routes/index.js")(app, model, controller);
+require("./routes/index")(app, model, controller);
 
-let dbConnect = require("./config/database.js")();
+global.config = require("./config/constants.js");
+
+
+let dbConnect = require("./config/database.js")(mongoose);
 dbConnect.then(async (response) => {
     console.log(response);
 }).catch((err) => {
@@ -35,6 +38,6 @@ dbConnect.then(async (response) => {
 server.listen(8000, function () {
     console.log("(---------------------------------)");
     console.log("|         Server Started...       |");
-    console.log("|    http://localhost:8000    |");
+    console.log("|    " + config.baseUrl + "   |");
     console.log("(---------------------------------)");
 });
