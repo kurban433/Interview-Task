@@ -74,7 +74,7 @@ module.exports = function (model) {
 
             let query = {
                 isDelete: false,
-                role:'user'
+                role: 'user'
             }
 
             if (search) {
@@ -84,8 +84,8 @@ module.exports = function (model) {
                 ]
             }
 
-            let start = pageNumber * length 
-            start = start -length
+            let start = pageNumber * length
+            start = start - length
 
             let userlist = await model.User.find(query).skip(Number(start))
                 .limit(Number(length))
@@ -112,7 +112,7 @@ module.exports = function (model) {
 
     module.deleteUser = async function (request, response) {
         try {
-            let user = await model.User.findOne({ _id: request.body.id });
+            let user = await model.User.findOne({ _id: request.query.id });
             if (!user) {
                 return response.send({
                     status: "fail",
@@ -122,15 +122,15 @@ module.exports = function (model) {
                 });
             };
 
-            let userUpdate = await model.User.updateOne({ _id : request.body.id },{ isDelete: true });
-            if(userUpdate){
+            let userUpdate = await model.User.updateOne({ _id: request.query.id }, { isDelete: true });
+            if (userUpdate) {
                 return response.send({
                     status: "success",
                     result: null,
                     message: "Successfully Delete User.",
                     statusCode: 200,
                 });
-            }else{
+            } else {
                 return response.send({
                     status: "fail",
                     result: null,
@@ -153,7 +153,7 @@ module.exports = function (model) {
     module.editUser = async function (request, response) {
         try {
             let { id, username, email, status } = request.body
-            let user = await model.User.findOne({ _id: id, isDelete : false });
+            let user = await model.User.findOne({ _id: id, isDelete: false });
             if (!user) {
                 return response.send({
                     status: "fail",
@@ -162,23 +162,211 @@ module.exports = function (model) {
                     statusCode: 401,
                 });
             };
-            let userUpdate = await model.User.updateOne({ _id : id },{ 
-                username : username,
-                email : email,
-                status : status,
+            let userUpdate = await model.User.updateOne({ _id: id }, {
+                username: username,
+                email: email,
+                status: status,
             });
-            if(userUpdate){
+            if (userUpdate) {
                 return response.send({
                     status: "success",
                     result: null,
                     message: "Successfully Update User Details.",
                     statusCode: 200,
                 });
-            }else{
+            } else {
                 return response.send({
                     status: "fail",
                     result: null,
                     message: "User not update, please try after sometime.",
+                    statusCode: 401,
+                });
+            }
+        } catch (error) {
+            console.log("error", error);
+            return response.send({
+                status: "fail",
+                result: null,
+                message: "Something went wrong",
+                statusCode: 401,
+            });
+        }
+    }
+
+    module.productCreate = async function (request, response) {
+        try {
+            let { name, price, category } = request.body
+            let product = await model.Product.findOne({ name: name, category: category ,isDelete: false});
+            if (product) {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "Already exist this product.",
+                    statusCode: 401,
+                });
+            };
+            let createProduct = await model.Product.create({
+                name: name,
+                price: price,
+                category: category
+            });
+            if (createProduct) {
+                return response.send({
+                    status: "success",
+                    result: null,
+                    message: "Successfully Created Product.",
+                    statusCode: 200,
+                });
+            } else {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "Product not created, please try after sometime.",
+                    statusCode: 401,
+                });
+            }
+        } catch (error) {
+            console.log("error", error);
+            return response.send({
+                status: "fail",
+                result: null,
+                message: "Something went wrong",
+                statusCode: 401,
+            });
+        }
+    }
+
+    module.productList = async function (request, response) {
+        try {
+
+            console.log("----->", request.body);
+
+            let { pageNumber, length, search } = request.body
+
+            let query = {
+                isDelete: false,
+            }
+
+            if (search) {
+                query["$or"] = [
+                    { name: { $regex: ".*" + search + ".*", $options: "i" } },
+                    { category: { $regex: ".*" + search + ".*", $options: "i" } },
+                    { price: { $regex: ".*" + search + ".*", $options: "i" } },
+                ]
+            }
+
+            let start = pageNumber * length
+            start = start - length
+
+            let productlist = await model.Product.find(query).skip(Number(start))
+                .limit(Number(length))
+                .sort({ createdAt: -1 })
+                .lean();
+
+            return response.send({
+                status: "success",
+                result: productlist,
+                message: "Product List",
+                statusCode: 200,
+            });
+
+        } catch (error) {
+            console.log("error", error);
+            return response.send({
+                status: "fail",
+                result: null,
+                message: "Something went wrong",
+                statusCode: 401,
+            });
+        }
+    }
+
+    module.productDelete = async function (request, response) {
+        try {
+            let product = await model.Product.findOne({ _id: request.query.id });
+            if (!product) {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "Product not found.",
+                    statusCode: 401,
+                });
+            };
+
+            let updateProduct = await model.Product.updateOne({ _id: request.query.id }, { isDelete: true });
+            if (updateProduct) {
+                return response.send({
+                    status: "success",
+                    result: null,
+                    message: "Successfully Product Delete.",
+                    statusCode: 200,
+                });
+            } else {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "Product not update, please try after sometime.",
+                    statusCode: 401,
+                });
+            }
+
+        } catch (error) {
+            console.log("error", error);
+            return response.send({
+                status: "fail",
+                result: null,
+                message: "Something went wrong",
+                statusCode: 401,
+            });
+        }
+    }
+
+    module.productUpdate = async function (request, response) {
+        try {
+            let { id, name, price, category, status } = request.body
+            let product = await model.Product.findOne({ _id: id, isDelete: false });
+            if (!product) {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "Product not found.",
+                    statusCode: 401,
+                });
+            };
+            let checkProduct = await model.Product.findOne({
+                _id: { $ne: product._id },
+                name: name,
+                category: category,
+                isDelete: false
+            });
+
+            if (checkProduct) {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "Already exist this product.",
+                    statusCode: 401,
+                });
+            };
+
+            let updateProduct = await model.Product.updateOne({ _id: id }, {
+                name: name,
+                price: price,
+                category: category,
+                status: status
+            });
+            if (updateProduct) {
+                return response.send({
+                    status: "success",
+                    result: null,
+                    message: "Successfully Update Product Details.",
+                    statusCode: 200,
+                });
+            } else {
+                return response.send({
+                    status: "fail",
+                    result: null,
+                    message: "Product not update, please try after sometime.",
                     statusCode: 401,
                 });
             }

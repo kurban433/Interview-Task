@@ -4,6 +4,13 @@ let path = require("path");
 let bodyParser = require("body-parser");
 let fileUpload = require("express-fileupload");
 let mongoose = require('mongoose');
+let swaggerUi = require("swagger-ui-express")
+let swaggerJSDoc = require("swagger-jsdoc");
+
+const swaggerDocument = require('./swagger.json');
+const customCss = fs.readFileSync((process.cwd() + "/swagger.css"), 'utf8');
+
+
 let app = express();
 let server = require("http").createServer(app);
 app.use(fileUpload());
@@ -26,6 +33,36 @@ var controller = require("./app/controller/index")(model);
 require("./routes/index")(app, model, controller);
 
 global.config = require("./config/constants.js");
+
+
+let swagggerOption = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: "Typepe APIs Collection",
+            version: '1.0.0'
+        },
+        "components": {
+            "securitySchemes": {
+                "bearerAuth": {
+                    "type": "http",
+                    "scheme": "bearer",
+                    "bearerFormat": "JWT"
+                }
+            }
+        },
+        servers: [
+            {
+                url: config.baseUrl,
+            }
+        ]
+    },
+    // apis : ['./app/controllers/admin/auth.js']
+    apis: ['./app.js']
+}
+
+const swaggerSpec = swaggerJSDoc(swagggerOption);
+app.use('/api-collection', swaggerUi.serve, swaggerUi.setup(swaggerDocument, customCss))
 
 
 let dbConnect = require("./config/database.js")(mongoose);

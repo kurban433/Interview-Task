@@ -37,7 +37,7 @@ module.exports = function (model) {
                     message: "Invalid credentials!",
                     statusCode: 401,
                 });
-            }userLogin
+            }
 
 
             var token = jwt.sign({ data: userData._id }, config.jwt_secret, { expiresIn: config.jwt_expire });

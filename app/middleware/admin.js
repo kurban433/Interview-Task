@@ -4,7 +4,7 @@ module.exports = function (model) {
 
     module.isLogin = async function (req, res, next) {
         let { authorization } = req.headers
-
+        console.log("req.headers",req.headers);
         if (authorization) {
             let token = authorization.split(" ")[1]
             let adminData = await model.User.findOne({

@@ -19,7 +19,7 @@ module.exports = function (mongoose, schema) {
         },
         isDelete: {
             type: Boolean,
-            default: true
+            default: false
         },
         createdAt: { type: Date, default: new Date() },
         updatedAt: { type: Date, default: new Date() }
